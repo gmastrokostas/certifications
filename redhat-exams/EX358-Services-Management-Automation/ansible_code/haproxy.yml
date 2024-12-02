@@ -1,0 +1,17 @@
+- hosts: node3
+  vars:
+    haproxy_frontend_bind_address: '*'
+    haproxy_frontend_port: 80
+    haproxy_frontend_mode: 'tcp'
+    haproxy_backend_mode: 'tcp'
+    haproxy_backend_balance_method: 'roundrobin'
+    haproxy_backend_httpchk: 'HEAD / HTTP/1.1\r\nHost:localhost'
+    haproxy_backend_servers:
+      - name: node1
+        address: 192.168.0.27:80
+      - name: node2
+        address: 192.168.0.28:80
+  roles:
+    - role: HA-proxy 
+
+

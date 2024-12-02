@@ -1,0 +1,8 @@
+[haproxy]
+node3
+
+[apache]
+node2
+
+[nginx]
+node3

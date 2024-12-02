@@ -1,0 +1,6 @@
+select user,host from mysql.user;
+
+create user 'koukla'@'localhost' identified by 'zxc123';
+grant all privileges on *.* to 'koukla'@'8.8.8.8' identified by 'zxc123';
+create database cars;
+

@@ -1,0 +1,86 @@
+- hosts: apache
+  tasks:
+  - name: Install rpms
+    package:
+      name: "{{item}}"
+      state: latest
+    loop:
+      - httpd
+      - mod_ssl
+      - vim
+      - bash-*
+      - policycoreutils-python-utils
+
+  - name: Create directory content webservers
+    file:
+      state: directory
+      path: /content/webservers/site_1
+      recurse: true
+
+  - name: Create directory content logs
+    file:
+      state: directory
+      recurse: true
+      path: /content/webservers/logs
+
+  - name: Create dir for key and crt files
+    file:
+      state: directory
+      recurse: true
+      path: /etc/ssl_files/
+
+  - name: Selinux change context for webservers
+    command: semanage fcontext -a -t httpd_sys_content_t "/content/webservers(/.*)?"
+
+  - name: Selinux change context for logs
+    command: semanage fcontext -a -t httpd_log_t "/content/webservers/logs(/.*)?"
+
+  - name: Selinux allow port 9191
+    command: semanage port  -a -t http_port_t -p  tcp 9191
+
+  - name: Run restorecon 
+    command: restorecon -R -v /content
+
+  - name: Copy the crt file
+    copy:
+      src: files/ex358.crt
+      dest: /etc/ssl_files/ex358.crt
+
+  - name: Copy the key file
+    copy:
+      src: files/ex358.key
+      dest: /etc/ssl_files/ex358.key
+
+  - name: Copy the vhost file
+    copy:
+      src: files/site_1.lol.conf
+      dest: /etc/httpd/conf.d/site_1.lol.conf
+
+  - name: Copy the index file
+    copy:
+      src: files/index.html
+      dest: /content/webservers/site_1/index.html
+
+  - name: Firewall allow https
+    firewalld:
+      service: https
+      permanent: true
+      state: enabled
+
+  - name: Firewall allow port 9191
+    firewalld:
+      port: 9191/tcp
+      permanent: true
+      state: enabled
+
+  - name: Reload firewall
+    service:
+      name: firewalld
+      state: reloaded
+
+
+  - name: restart and enable httpd
+    service:
+      name: httpd
+      state: restarted
+      enabled: true

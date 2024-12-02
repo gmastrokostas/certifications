@@ -1,0 +1,141 @@
+- hosts: node3
+  tasks:
+  - name: Install software
+    package:
+      name: "{{item}}"
+      state: latest
+    loop:
+      - samba
+      - samba-*
+
+  - name: Open Firewall
+    firewalld:
+      service: samba
+      state: enabled
+      permanent: true
+
+
+  - name: Create directory shares samb_shares user1 user2 colab
+    file:
+      state: directory
+      path: /shares/samba_shares/{{item}}
+      recurse: true
+    loop:
+      - user_1
+      - user_2
+      - colab
+
+  - name: Adjust Selinux for dirs user1 user2 and colab
+    command: chcon -t samba_share_t /shares/samba_shares/{{item}}
+    loop:
+      - user_1
+      - user_2
+      - colab
+
+  - name: Change ownership for user_1 dir
+    file:
+      path: /shares/samba_shares/user_1
+      owner: user_1
+      group: user_1
+      mode: '0770'
+
+  - name: Change ownweship for user_2 dir
+    file:
+      path: /shares/samba_shares/user_2
+      owner: user_2
+      group: user_2
+      mode: '0770'
+
+  - name: Change ownership for colab  dir
+    file:
+      path: /shares/samba_shares/colab
+      owner: root
+      group: colab
+      mode: '0770'
+
+  - name: Template smb.conf.j2 file
+    template: 
+      src: templates/smb.conf.j2
+      dest: /etc/samba/smb.conf
+
+  - name: Set samba password for user_1
+    shell: echo -e "zxc123\nzxc123" | /usr/bin/smbpasswd -a user_1
+
+  - name: Set samba password for user_2
+    shell: echo -e "zxc123\nzxc123" | /usr/bin/smbpasswd -a user_2
+
+  - name: Enable smb user_1
+    shell: /usr/bin/smbpasswd -e user_1
+  - name: Enable smb user_2
+    shell: /usr/bin/smbpasswd -e user_2 
+
+  - name: Restart samba service
+    service:
+      name: "{{item}}"
+      state: restarted
+      enabled: true
+    loop:
+      - firewalld
+      - smb
+
+- hosts: node1
+  tasks:
+  - name: Install software
+    package:
+      state: latest
+      name: "{{item}}"
+    loop:
+      - cifs-utils
+      - samba-client
+
+
+  - name: Create directories shares samba_shares user1 user2 colab
+    file:
+      state: directory
+      path: /shares/samba_shares/{{item}}
+      recurse: true
+    loop:
+      - user_1
+      - user_2
+      - colab
+
+  - name: Copy creds file for user_1
+    copy:
+      src: files/user1_creds
+      dest: /home/user_1/creds
+
+  - name: Copy creds file for user_2
+    copy:
+      src: files/user2_creds
+      dest: /home/user_2/creds
+
+  - name: Copy creds file for colab under root
+    copy:
+      src: files/root_creds
+      dest: /root/creds
+
+  - name: Set cifs fstab entry and mount for user_1
+    mount:
+      src: //192.168.0.29/user_1
+      path: /shares/samba_shares/user_1
+      opts: "rw,uid=1001,gid=1002,forceuid,forcegid,credentials=/home/user_1/creds"
+      fstype: cifs
+      state: mounted
+
+  - name: Set cifs fstab entgry for mount for user_2
+    mount:
+      src: //192.168.0.29/user_2
+      path: /shares/samba_shares/user_2
+      opts: "rw,uid=1001,gid=1002,forceuid,forcegid,credentials=/home/user_2/creds"
+      fstype: cifs
+      state: mounted
+
+  - name: Set cifs fstab for entry for colab 
+    mount:
+      src: //192.168.0.29/colab
+      path: /shares/samba_shares/colab
+      opts: "multiuser,credentials=/root/creds,sec=ntlmssp"
+      fstype: cifs
+      state: mounted
+
+
