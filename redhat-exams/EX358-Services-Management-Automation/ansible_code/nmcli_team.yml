@@ -1,0 +1,30 @@
+- hosts: all
+  vars:
+    nmcli_team_slave:
+    - conn_name: t1
+      ifname: ens161
+      master: team0
+    - conn_name: t2
+      ifname: ens192
+      master: team0
+  tasks:
+    - name: Create team0
+      nmcli:
+        type: team
+        conn_name: team0
+        runner: activebackup
+        state: present
+        ip4: 192.168.0.201
+        gw4: 192.168.0.1
+        dns4_ignore_auto: true
+        method4: manual
+        autoconnect: true
+
+    - name: Create secondaries for team0
+      nmcli:
+        type: team-slave
+        conn_name: "{{item.conn_name}}"
+        ifname: "{{item.ifname}}"
+        master: "{{item.master}}"
+        state: present
+      loop: "{{nmcli_team_slave}}"

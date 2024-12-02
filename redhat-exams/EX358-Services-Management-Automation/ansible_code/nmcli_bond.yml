@@ -1,0 +1,33 @@
+- hosts: all
+  vars:
+    nmcli_bond_slave:
+      - conn_name: b1
+        ifname: ens161
+        master: bond0
+      - conn_name: b2
+        ifname: ens192
+        master: bond0
+
+  tasks:
+  - name: Create bond
+    nmcli:
+      conn_name: bond0
+      type: bond
+      state: present
+      ip4: 192.168.0.201
+      gw4: 192.168.0.1
+      mode: active-backup
+      state: present
+      primary: ens160
+
+  - name: Add bond secondaries
+    nmcli:
+      type: bond-slave
+      conn_name: '{{item.conn_name}}'
+      ifname: '{{item.ifname}}'
+      master: '{{item.master}}'
+      state: present
+    loop: '{{nmcli_bond_slave}}'
+
+  - name: Apply changes
+    command: nmcli connection up bond0

@@ -1,0 +1,101 @@
+- hosts: node3
+  tasks:
+  - name: Install mysql and pythong stuff
+    package:
+       name: "{{item}}"
+       state: latest
+    loop:
+      - mysql-server
+      - python3-PyMySQL
+  - name: Start and enable mysql
+    service:
+      name: mysqld
+      state: started
+      enabled: true
+
+  - name: Allow sql via firewall
+    firewalld:
+      service: mysql
+      state: enabled
+      permanent: true
+
+  - name: reset root password
+    community.mysql.mysql_user:
+      login_unix_socket: /var/lib/mysql/mysql.sock
+      login_user: root
+      password: 'zxc123'
+      name: root
+
+  - name: Remove anon users
+    community.mysql.mysql_user:
+      name: ''
+      state: absent
+      login_user: root
+      login_password: 'zxc123'
+
+  - name: Remove test db
+    community.mysql.mysql_db:
+      name: test
+      state: absent
+      login_user: root
+      login_password: 'zxc123'
+
+  - name: Create database car_database
+    community.mysql.mysql_db:
+      name: car_database
+      state: present
+      login_user: root
+      login_password: 'zxc123'
+
+  - name: Create user seeker
+    community.mysql.mysql_user:
+      name: seeker
+      password: 'zxc123'
+      login_user: root
+      login_password: 'zxc123'
+      priv: 'car_database.*:ALL,GRANT'
+
+  - name: Create talbe gen_info
+    community.mysql.mysql_query:
+      login_db: car_database
+      query: create table gen_info (id int(10), name varchar(100), model varchar(100))
+      login_user: seeker
+      login_password: 'zxc123'
+
+  - name: Insert data to gen_info
+    community.mysql.mysql_query:
+      login_db: car_database
+      login_user: seeker
+      login_password: 'zxc123'
+      query: insert into gen_info (id, name, model) values ('10', 'george', 'ford')
+
+  - name: Query data in gen_info
+    community.mysql.mysql_query:
+      login_db: car_database
+      login_user: seeker
+      login_password: 'zxc123'
+      query: select * from gen_info
+ 
+  - name: Create a datadump
+    community.mysql.mysql_db:
+      state: dump
+      name: car_database
+      target: /var/tmp/car_dump.sql
+      login_user: seeker
+      login_password: 'zxc123'
+     
+  - name: Drop database car_database
+    community.mysql.mysql_query:
+      login_db: car_database
+      login_user: seeker
+      login_password: 'zxc123'
+      query: drop database car_database
+
+
+  - name: Restore database car_database
+    community.mysql.mysql_db:
+      name: car_database
+      state: import
+      target: /var/tmp/car_dump.sql
+      login_user: root
+      login_password: 'zxc123'

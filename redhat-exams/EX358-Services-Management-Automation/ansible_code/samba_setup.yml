@@ -1,0 +1,187 @@
+- hosts: samba
+  tasks:
+  - name: Install samba server software 
+    package:
+      name: "{{item}}"
+      state: latest
+    loop:
+      - samba-*
+      - samba
+      - vim
+      - policycoreutils-python-utils
+
+  - name: Include vars file
+    include_vars:
+      file: vars/user_password.yml
+
+  - name: Create colab group
+    group:
+      name: colab
+
+  - name: Create users 1 and 2
+    user:
+      name: "{{item}}"
+      groups: colab
+      append: yes
+    loop:
+      - user_1
+      - user_2
+
+  - name: set password for user_1
+    user:
+      name: "{{item}}"
+      password: "{{user_password | password_hash('sha512') }}"
+      update_password: always
+    loop:
+      - user_1
+      - user_2
+
+  - name: Create samba password
+    shell: (echo "{{user_password}}"; echo "{{user_password}}") | /usr/bin/smbpasswd -a -s user_1
+
+  - name: Create content samba  share_1 share_2 and colab  directories
+    file:
+      state: directory
+      recurse: true
+      path: /content/samba/{{item}}
+      mode: 0777
+    loop:
+      - share_1
+      - share_2
+      - colab
+
+  - name: Change owner of share_1
+    file:
+      path: /content/samba/share_1
+      owner: user_1
+      group: user_1
+
+  - name: Change owner of share_2
+    file:
+      path: /content/samba/share_2
+      owner: user_2
+      group: user_2
+
+  - name: change owner of colab
+    file:
+      path: /content/samba/colab
+      owner: root
+      group: colab
+
+  - name: Set fcontext for content samba
+    command: semanage fcontext -a -t samba_share_t "/content/samba(/.*)?"
+
+  - name: Run restorcon for samba
+    command: restorecon -R -v /content/samba/
+
+  - name: Copy samba config file
+    copy:
+      src: files/smb.conf
+      dest: /etc/samba/smb.conf
+
+  - name: Allow samba from firewall
+    firewalld:
+      service: samba
+      state: enabled
+      permanent: true
+
+  - name: Restart firewall
+    service:
+      name: firewalld
+      state: restarted
+      enabled: true
+
+  - name: Rsh nstart samba
+    service:
+      name: smb
+      state: restarted
+      enabled: true
+
+- hosts: clients
+  tasks:
+    - name: Include vars files
+      include_vars:
+        file: vars/user_password.yml
+
+    - name: Install client samba rpms
+      package:
+        name: "{{item}}"
+        state: latest
+      loop:
+        - cifs-utils
+        - samba-client
+
+    - name: Create samba mount directory
+      file:
+        state: directory
+        path: /content/samba/share_1
+
+    - name: Create group colab
+      group:
+        name: colab
+
+    - name: Create user 1 and 2
+      user:
+        name: "{{item}}"
+        groups: colab
+        append: yes
+      loop:
+        - user_1
+        - user_2
+
+    - name: Set password for users 1 and 2
+      user:
+        name: "{{item}}"
+        password: "{{user_password | password_hash('sha512') }}"
+        update_password: always
+      loop:
+        - user_1
+        - user_2
+
+
+    - name: Create cred files
+      file:
+        state: touch
+        path: /home/{{item}}/creds
+      loop:
+        - user_1
+        - user_2
+
+    - name: Create cred file for root
+      file:
+        state: touch
+        path: /root/creds
+
+
+    - name: Create creds  for user 1
+      blockinfile:
+        path: /home/user_1/creds
+        block: |
+          username=user_1
+          password=zxc123
+
+    - name: Create creds for user 2
+      blockinfile:
+        path: /home/user_2/creds
+        block: |
+          username=user_2
+          passwaord=zxc123
+
+    - name: Create creds file for colab under root
+      blockinfile:
+        path: /root/creds
+        block: |
+          username=user_1
+          password=zxc123
+          username=user_2
+          password=zxc123
+
+    - name: mount samba share point
+      mount:
+        src: //192.168.0.231/share_1
+        path: /content/samba/share_1
+        opts: rw,forcegid,forceuid,gid=1001,uid=1001,credentials=/home/user_1/creds
+        fstype: cifs
+        state: mounted
+
+

@@ -1,0 +1,82 @@
+- hosts: nginx
+  tasks:
+  - name: install rpms
+    package:
+      name: "{{item}}"
+      state: latest
+    loop:
+      - nginx
+      - mod_ssl
+      - bash-*
+      - policycoreutils-python-utils
+
+  - name: Create content webservers site_1 directory
+    file:
+      state: directory
+      recurse: true
+      path: /content/webservers/site_2
+      
+  - name: Create content webservers logs directory
+    file:
+      state: directory
+      recurse: true
+      path: /content/webservers/logs
+
+  - name: Create the ssl_files dir
+    file:
+      state: directory
+      recurse: true
+      path: /etc/ssl_files/
+
+  - name: Selinux adjust context for webservers
+    command: semanage fcontext -a -t httpd_sys_content_t "/contenct/webservers(/.*)?"
+
+  - name: Selinux adjust context for logs
+    command: semanage fcontext -a -t httpd_log_t "/content/webservers/logs(/.*)?"
+
+  - name: Restrocon
+    command: restorecon -R -v /content/
+
+  - name: Copy v-hosts file
+    copy:
+      src: files/site_2.lol.conf
+      dest: /etc/nginx/conf.d/site_2.lol.conf
+
+  - name: Copy crt and key file
+    copy:
+      src: files/{{item}}
+      dest: /etc/ssl_files/{{item}}
+    loop:
+      - ex358.crt
+      - ex358.key
+
+  - name: Copy the index files
+    copy:
+      src: files/index.html
+      dest: /content/webservers/site_2/index.html
+
+  - name: Firewall allow https 
+    firewalld:
+      service: https
+      state: enabled
+      permanent: true
+
+  - name: Firewall allow port 9191
+    firewalld:
+      port: 9191/tcp
+      state: enabled
+      permanent: true
+
+  - name: Reload firewalld service
+    service:
+      name: firewalld
+      state: reloaded
+      enabled: true
+
+  - name: Restart nginx service
+    service:
+      name: nginx
+      state: reloaded
+      enabled: true
+
+
