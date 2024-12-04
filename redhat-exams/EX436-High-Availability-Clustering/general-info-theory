@@ -1,0 +1,40 @@
+Corosync:
+A framework and set of APIs that provides cluster membership, messaging, and quorum capabilities.
+It ensures that all nodes in the cluster are aware of each other and can communicate reliably.
+It is basically responsible for:
+	- Cluster membership, making sure all nodes are aware of one another. It also notifies other nodes when a node leaves or joins the cluster.
+	- Messaging, sending and receiving messages important for maintaining the state of the cluster.
+	- Quorum: This is the min number of nodes needed for a cluster to operate. This prevents split brain situations.
+
+Pacemaker:
+Is part of corosync.
+Is responsible for resource management. It works on top of corosync.
+An open-source cluster resource manager that coordinates resources and services to ensure they remain highly available.
+It monitors the cluster and takes action in the event of a failure, such as starting or stopping services2.
+The "pcs" command tool is used with pacemaker.
+COMPONENTS
+	- CIB:  It exists on all participating nodes.
+          	Function: Stores the cluster configuration and the current state of all resources and nodes.
+		Role: Acts as the authoritative source of cluster data, and any changes to the cluster configuration are made here.
+
+	- CRMD: Provides access to CIB. All of them communicate between nodes. Any issues here indicate a problem at the HA level.
+		Function: Manages the overall state of resources across the cluster.
+		Role: Coordinates with the CIB and other daemons to start, stop, and monitor resources, ensuring they are running as expected.
+
+	- LRMD: Is the local service manager.  Any issues here indicate a problem at the local service level.
+		Function: Manages the resources on a local node.
+		Role: Executes operations on resources as instructed by the CRMD and reports the results back to the CRMD.
+
+	- PCSD: This is redhat's interface management for HA. This talks to CRMD. This command talks with all nodes.
+		Function: Provides a user-friendly interface for managing Pacemaker and Corosync configurations.
+		Role: Helps in configuring and managing the cluster using tools like pcs.
+
+	- Helper services:
+		- Pengine: Policy engine
+		- Tengine: Transition engine
+		- Stoneinitd: Stone it requests
+
+
+Fencing: 
+A mechanism to isolate a failed node from the rest of the cluster to prevent it from causing issues.
+This is typically done using scripts or agents that execute actions like powering off the failed node or disconnecting it from shared storage
