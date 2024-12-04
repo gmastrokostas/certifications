@@ -21,16 +21,6 @@
 	pcs cluster enable --all
 ##################################
 ######### PACEMAKER ##############
-GENERAL INFO:
-COMPONENTS
-	- CIB:  It exists on all participating nodes.
-	- CRMD: Provides access to CIB. All of them communicate between nodes. Any issues here indicate a problem at the HA level.
-	- LRMD: Is the local service manager.  Any issues here indicate a problem at the local service level.
-	- PCSD: This is redhat's interface management for HA. This talks to CRMD. This command talks with all nodes.
-	- Helper services:
-		- Pengine: Policy engine
-		- Tengine: Transition engine
-		- Stoneinitd: Stone it requests
 
 #CHECK STATUS OF CLUSTER
 pcs status
