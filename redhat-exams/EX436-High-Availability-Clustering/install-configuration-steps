@@ -76,7 +76,7 @@ corosync-quorumtool
 --last_man_standing:	#Quorom is recalculated every 10 seconds which allows admins to take out quorum nodes 1 by 1.
 --two_node: 		#Allows for a 2 node cluster
 
-#Fencing
+#################FENCING
 Types of Fencing
 	Power Fencing: 
 		- Isolates the PSUs.
@@ -87,5 +87,18 @@ Types of Fencing
 		- Or by using SCSI reservations
 		- Node will not join automatically
 
+Types of Fencing Agents:
+	- disk
+	- Hypervisor
+	- Power Switch
+	- Management Board
+	- Test Agents
+
+Type "fencing" and hit tab to see all types of fencing
+
+#Configure Fencing
+pcs stonith list #Shows a list of actual fencing devices
+pcs stonith desc #help info
+pcs stonith create "your_custom_name" 'fencing_agent' 'parameters for that fencing agent'
 
 
