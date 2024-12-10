@@ -1,0 +1,70 @@
+#ON ALL NODES! 
+	yum update -y; reboot
+	yum install epel-release -y
+	#ROCKY 9
+		yum config-manager --set-enabled highavailability
+		yum install corosync pacemaker pcs -y
+		reboot
+		
+	#REDHAT 8
+		subscription-manager repos --enable=rhel-8-for-x86_64-highavailability-rpms
+		yum install fence-agents-all pcs pacemaker
+		reboot
+		
+		
+	systemctl enable --now pcsd
+	echo zxc123| passwd --stdin hacluster
+
+#ON ONE NODE
+	pcs host  auth node1-ha-lab-hpv2-R9 node2-ha-lab-hpv2-R9 node3-ha-lab-hpv2-R9  -u hacluster -p zxc123
+	pcs cluster setup  mycluster node1-ha-lab-hpv2-R9 node2-ha-lab-hpv2-R9 node3-ha-lab-hpv2-R9
+	pcs cluster enable --all
+##################################
+######### PACEMAKER ##############
+
+#CHECK STATUS OF CLUSTER
+pcs status
+pcs cluster status
+
+#RESOURCES
+#EXAMPLE1 - Define Resources
+pcs resource create apache-ip IPaddr2 ip="x.x.x.x" cidr_netmask=24 
+pcs resource show
+pcs property set stonith-enabled=false
+pcs resouce create apache-service apache
+pcs resource config httpfs
+#----------------------------------------------------------------------------------------------
+#EXAMPLE2 - Define Resources
+pcs resource create apache-ip IPaddr2 ip=192.168.0.150 cidr_netmask=24
+pcs resource status apache-ip
+pcs resource config  apache-ip
+pcs property set stonith-enabled=false #You do this ONLY when you dont use fencing.
+pcs resource create apache-service apache
+#---------------------------------------------------------------------------------------------
+
+#RESOURCE AGENT.
+It is a script that is used to Start/stop/monitor resources.
+So for example you can manage a web service resource like apache. This is not the same as systemct. This is specific to HA.
+#Generic cluster properties
+pcs property list --all
+pcs resource describe "service_name"
+#example:
+	pcs property set sonith-enable=false
+
+#View already defined resources
+pcs resource status
+
+#View config of already defined resource.
+pcs resource config  httpfs
+
+#Edit already defined resource.
+pcs resource update <resource_id> <parameter>=<value>
+pcs resource show <resource_id>
+
+#Delete already defined resource
+pcs resource delete <resource_id>
+
+
+
+
+
