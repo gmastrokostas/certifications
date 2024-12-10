@@ -65,6 +65,16 @@ pcs resource show <resource_id>
 pcs resource delete <resource_id>
 
 
+################COROSYNC
+
+#View corosync statistics
+corosync-quorumtool 
+
+#Managing Quorom
+--wait_for_all:  	#Wait for all nodes to join the cluster
+--auto_tie_breaker: 	#Will give quorom if you have 50% of nodes availability. 
+--last_man_standing:	#Quorom is recalculated every 10 seconds which allows admins to take out quorum nodes 1 by 1.
+--two_node: 		#Allows for a 2 node cluster
 
 
 
