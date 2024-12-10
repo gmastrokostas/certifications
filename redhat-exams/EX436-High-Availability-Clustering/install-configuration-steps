@@ -101,4 +101,11 @@ pcs stonith list #Shows a list of actual fencing devices
 pcs stonith desc #help info
 pcs stonith create "your_custom_name" 'fencing_agent' 'parameters for that fencing agent'
 
-
+#Common stonish options:
+	stonith-timeout #self explantory
+	priority	#Priority between multiple devices
+	pcmk_host_map	#Maps a hostname to a port
+	pcmk_host_check	#Defines how the cluster tells which machines may be controlled from the fencing device
+		dynamic-list	#Cluster queries fencing device
+		static-list	#use pcmk_host list to set
+		none		#Every device can fence every node
