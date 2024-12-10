@@ -76,5 +76,16 @@ corosync-quorumtool
 --last_man_standing:	#Quorom is recalculated every 10 seconds which allows admins to take out quorum nodes 1 by 1.
 --two_node: 		#Allows for a 2 node cluster
 
+#Fencing
+Types of Fencing
+	Power Fencing: 
+		- Isolates the PSUs.
+		- Nodes may or may not automatically rejoin
+
+	Fabric Fencing (drops a node from storage): 
+		- By closing ports on a FC switch
+		- Or by using SCSI reservations
+		- Node will not join automatically
+
 
 
