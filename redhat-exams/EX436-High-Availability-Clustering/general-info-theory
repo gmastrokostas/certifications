@@ -34,7 +34,6 @@ COMPONENTS
 		- Tengine: Transition engine
 		- Stoneinitd: Stone it requests
 
-
 Fencing: 
 A mechanism to isolate a failed node from the rest of the cluster to prevent it from causing issues.
 This is typically done using scripts or agents that execute actions like powering off the failed node or disconnecting it from shared storage
