@@ -1,5 +1,6 @@
 Corosync:
 A framework and set of APIs that provides cluster membership, messaging, and quorum capabilities.
+Corosync is the foundation on which Pacemaker relies for node communication and membership information.
 It ensures that all nodes in the cluster are aware of each other and can communicate reliably.
 It is basically responsible for:
 	- Cluster membership, making sure all nodes are aware of one another. It also notifies other nodes when a node leaves or joins the cluster.
@@ -7,10 +8,22 @@ It is basically responsible for:
 	- Quorum: This is the min number of nodes needed for a cluster to operate. This prevents split brain situations.
 
 Pacemaker:
-Is part of corosync.
-Is responsible for resource management. It works on top of corosync.
+Is responsible for resource management and decision making. It works with corosync and it depends on it for messaging and membership services.
 An open-source cluster resource manager that coordinates resources and services to ensure they remain highly available.
 It monitors the cluster and takes action in the event of a failure, such as starting or stopping services2.
+
+It handles:
+  - Resource Management: 
+    Manages services like apache, databases but at the cluster level.
+  
+  - Fencing:
+    A mechanism to isolate a failed node from the rest of the cluster to prevent it from causing issues.
+    This is typically done using scripts or agents that execute actions like powering off the failed node or disconnecting it from shared storage.
+  
+  - Policy Enforcement: 
+    Ensures resources are placed according to defined constraints and priorities.
+
+
 The "pcs" command tool is used with pacemaker.
 COMPONENTS
 	- CIB:  It exists on all participating nodes.
@@ -34,6 +47,3 @@ COMPONENTS
 		- Tengine: Transition engine
 		- Stoneinitd: Stone it requests
 
-Fencing: 
-A mechanism to isolate a failed node from the rest of the cluster to prevent it from causing issues.
-This is typically done using scripts or agents that execute actions like powering off the failed node or disconnecting it from shared storage
