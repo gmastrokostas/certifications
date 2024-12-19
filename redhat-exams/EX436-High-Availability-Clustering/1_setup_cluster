@@ -1,0 +1,36 @@
+#ON ALL NODES! 
+	yum update -y; reboot
+	yum install epel-release -y
+	#ROCKY 9
+		yum config-manager --set-enabled highavailability
+		yum install corosync pacemaker pcs -y
+		reboot
+		
+	#REDHAT 8
+		subscription-manager repos --enable=rhel-8-for-x86_64-highavailability-rpms
+		yum install fence-agents-all pcs pacemaker
+		reboot
+		
+		
+	systemctl enable --now pcsd
+	echo zxc123| passwd --stdin hacluster
+
+#ON ONE NODE
+	pcs host  auth node1-ha-lab-hpv2-R9 node2-ha-lab-hpv2-R9 node3-ha-lab-hpv2-R9  -u hacluster -p zxc123
+	pcs cluster setup  mycluster node1-ha-lab-hpv2-R9 node2-ha-lab-hpv2-R9 node3-ha-lab-hpv2-R9
+	pcs cluster enable --all
+	systemctl enable --now  corosync
+	systemctl enable --now  pacemaker
+
+##################################
+######### PACEMAKER -- PCS ##############
+
+#CHECK STATUS OF CLUSTER
+pcs status
+pcs cluster status
+
+#ADD-DELETE-REMOVE-ENABLE-START NODES WITHIN A CLUSTER
+#Add a node from scratch after you installed the required software
+pcs host auth "node_name" -u hacluster
+
+
