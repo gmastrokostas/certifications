@@ -1,0 +1,31 @@
+#PACEMAKER RESOURCE CREATION
+
+#Create a Floating IP Resource
+pcs resource create floating-ip ocf:heartbeat:IPaddr2 \
+    ip=192.168.0.150 cidr_netmask=24 op monitor interval=30s
+
+ocf:heartbeat:IPaddr2:   Standard OCF resource agent for managing IP addresses.
+ip=192.168.0.150: 	 Floating IP address.
+cidr_netmask=24: 	 Subnet mask for your network.
+op monitor interval=30s: Monitor the resource every 30 seconds.
+
+
+#Install httpd on all nodes and configure your index file
+
+#Create an apache an apache resource
+pcs resource create apache ocf:heartbeat:apache \
+    configfile=/etc/httpd/conf/httpd.conf \
+    statusurl="http://127.0.0.1/server-status" \
+    op monitor interval=30s
+
+
+configfile: Points to the Apache configuration file.
+statusurl: Ensures Apache is running (you might need to enable mod_status in Apache).
+
+
+#Create a Resource Group
+pcs resource group add web-group floating-ip apache
+
+
+#Test Failover
+pcs cluster stop node1
