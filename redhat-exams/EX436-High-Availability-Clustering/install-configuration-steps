@@ -23,11 +23,17 @@
 	systemctl enable --now  pacemaker
 
 ##################################
-######### PACEMAKER ##############
+######### PACEMAKER -- PCS ##############
 
 #CHECK STATUS OF CLUSTER
 pcs status
 pcs cluster status
+
+#ADD-DELETE-REMOVE-ENABLE-START NODES WITHIN A CLUSTER
+#Add a node from scratch after you installed the required software
+pcs host auth "node_name" -u hacluster
+
+
 
 #RESOURCES
 #EXAMPLE1 - Define Resources
