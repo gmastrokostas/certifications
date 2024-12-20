@@ -10,4 +10,5 @@ RED HAT CERTIFICATIONS
  - EX436 Red Hat Certified Specialist in High Availability Clustering exam
  - EX188 Red Hat Certified Specialist in Containers exam
 
-CCNA 
+NETWORKING
+ - CCNA 
