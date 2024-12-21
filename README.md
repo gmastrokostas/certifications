@@ -1,6 +1,6 @@
 # Certifications
 
-List of Certificates I am working on and/or completed.
+List of Certificates I am working on.
 These are my personal notes from various sources.
 The material here is NOT from the exams themselves.
 The material here is just the knowledge gained while studying for these certifications.
