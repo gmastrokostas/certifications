@@ -1,0 +1,30 @@
+##INFO TAKEN FROM REDHAT'S ONLINE DOCUMENTATION
+https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/8/html/configuring_and_managing_high_availability_clusters/assembly_configuring-cluster-quorum-configuring-and-managing-high-availability-clusters#assembly_configuring-cluster-quorum-configuring-and-managing-high-availability-clusters
+
+#WHAT IS QURUM
+
+
+#QUORUM OPTIONS
+
+last_man_standing:
+------------------
+This option will allow for a cluster to operate with a lower number of nodes from the ones expected. 
+It will determine wich group (partition) of nodes should be operational.
+
+last_man_standing_window:
+-------------------------
+You give a specific time window for the "last_man_standing" to make a decision on which group of nodes
+should remain operational.
+
+
+wait_for_all:
+-------------
+It knows the original number of nodes in a cluster and it expects for all of them to be operational.
+However if a node or group of nodes goes down, this option is ignored so "last_man_standing" will take
+over, if the latter is enabled that is.
+
+
+auto_tie_breaker:
+-----------------
+When enabled the cluster can operate with half of the nodes being operational. 
+This option is used when there is an even number of nodes.
