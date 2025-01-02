@@ -19,6 +19,8 @@
 	pcs host  auth node1-ha-lab-hpv2-R9 node2-ha-lab-hpv2-R9 node3-ha-lab-hpv2-R9  -u hacluster -p zxc123
 	pcs cluster setup  mycluster node1-ha-lab-hpv2-R9 node2-ha-lab-hpv2-R9 node3-ha-lab-hpv2-R9
 	pcs cluster enable --all
+
+#ON ALL NODES
 	systemctl enable --now  corosync
 	systemctl enable --now  pacemaker
 
