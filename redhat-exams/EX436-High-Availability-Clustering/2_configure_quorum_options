@@ -32,3 +32,7 @@ auto_tie_breaker:
 -----------------
 When enabled the cluster can operate with half of the nodes being operational. 
 This option is used when there is an even number of nodes.
+Which partition of nodes becomes the dominant node is determined by the number of weight on each node.
+When a cluster has an even number of nodes, a split scenario (e.g., 2 vs. 2 in a 4-node cluster) can make it 
+impossible to establish quorum under normal majority rules. The auto_tie_breaker resolves this by assigning 
+additional "votes" to the lowest node ID in the cluster, effectively giving it extra weight.
