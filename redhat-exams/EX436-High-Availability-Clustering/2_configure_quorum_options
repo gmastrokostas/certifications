@@ -8,8 +8,12 @@ https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/8/html/configu
 
 last_man_standing:
 ------------------
-This option will allow for a cluster to operate with a lower number of nodes from the ones expected. 
-It will determine wich group (partition) of nodes should be operational.
+This option will allow for a cluster to temporary operate with a lower number of nodes from the ones expected.
+With this option the cluster will tolerate 1 node working only for the amount of time specified in "last_man_standing_window"
+This option also works in tandum with "wait_for_all". Reason being is that the cluster will need a full account of all nodes
+to come up.
+If quorum is not restored then the cluster will stop working.
+
 
 last_man_standing_window:
 -------------------------
@@ -20,8 +24,8 @@ should remain operational.
 wait_for_all:
 -------------
 It knows the original number of nodes in a cluster and it expects for all of them to be operational.
-However if a node or group of nodes goes down, this option is ignored so "last_man_standing" will take
-over, if the latter is enabled that is.
+However if a node or group of nodes goes down, this option is ignored for the duration specified in "last_man_standing_window"
+so "last_man_standing" will take over, if the latter is enabled that is.
 
 
 auto_tie_breaker:
