@@ -36,3 +36,7 @@ Which partition of nodes becomes the dominant node is determined by the number o
 When a cluster has an even number of nodes, a split scenario (e.g., 2 vs. 2 in a 4-node cluster) can make it 
 impossible to establish quorum under normal majority rules. The auto_tie_breaker resolves this by assigning 
 additional "votes" to the lowest node ID in the cluster, effectively giving it extra weight.
+In this setup the cluster is willing to work even with one node active if that node has the lowest ID.
+For example if in a 4 node setup (with node1 having the lowest ID), if node2 is not reachable, quorum will not choose
+node3 and node4. It will still go with node1 even if its one node
+Also in this setup "weight" option plays no role.
